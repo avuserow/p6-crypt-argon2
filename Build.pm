@@ -4,7 +4,7 @@ use LibraryMake;
 class Build {
     method build($dist) {
         if !$*DISTRO.is-win {
-            my $ext = "$dist/ext/argon2-20160406";
+            my $ext = "$dist/ext/argon2-20210621";
             my $res = "$dist/resources/libraries";
 
             my %vars = get-vars($ext);
