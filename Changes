@@ -1,0 +1,5 @@
+Revision history for Crypt::Argon2
+
+{{$NEXT}}
+    - Fix RESOURCES usage
+    - Transfer ownership to avuserow
