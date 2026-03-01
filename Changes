@@ -2,6 +2,10 @@ Revision history for Crypt::Argon2
 
 {{$NEXT}}
 
+0.3.0  2026-03-01T20:46:10Z
+    - Update to latest Argon2 snapshot (20210621)
+    - Add support for Argon2_id and Argon2_d variants
+
 0.2.3  2026-03-01T20:23:23Z
     - Restore README.md
 
