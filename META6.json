@@ -1,6 +1,7 @@
 {
   "Authors": [
-    "Adrian Kreher"
+    "Adrian Kreher",
+    "skinkade"
   ],
   "auth": "zef:avuserow",
   "build-depends": [
@@ -10,7 +11,7 @@
   "depends": [
   ],
   "description": "Easy Argon2i password hashing",
-  "license": "NOASSERTION",
+  "license": "Artistic-2.0",
   "name": "Crypt::Argon2",
   "perl": "6.*",
   "provides": {
