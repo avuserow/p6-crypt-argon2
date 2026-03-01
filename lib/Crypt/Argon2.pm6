@@ -3,44 +3,91 @@ use strict;
 use Crypt::Random;
 use Crypt::Argon2::Base;
 
+sub EXPORT {
+    return Map.new(
+        'Argon2Type' => Argon2Type,
+        'Argon2_i'   => Argon2_i,
+        'Argon2_d'   => Argon2_d,
+        'Argon2_id'  => Argon2_id,
+    );
+}
+
 unit module Crypt::Argon2;
 
-
-
 sub argon2-hash(Str $pwd, :$t_cost = 2, :$m_cost = 1 +< 16,
-                :$parallelism = 2, :$hashlen = 16) is export {
+                :$parallelism = 2, :$hashlen = 16,
+                Argon2Type :$type = Argon2_i) is export {
     my $saltlen = 16;
     my $encodedlen = argon2_encodedlen($t_cost, $m_cost, $parallelism,
-                                       $saltlen, $hashlen);
+                                       $saltlen, $hashlen, $type.Int);
 
     my $salt = crypt_random_buf($saltlen);
     my $encoded = Buf.new;
     $encoded[$encodedlen - 1] = 0;
 
-    my $err = argon2i_hash_encoded($t_cost, $m_cost, $parallelism,
-                                   $pwd, $pwd.encode.bytes,
-                                   $salt, $saltlen, $hashlen,
-                                   $encoded, $encodedlen);
+    my $err = do given $type {
+        when Argon2_d {
+            argon2d_hash_encoded($t_cost, $m_cost, $parallelism,
+                                 $pwd, $pwd.encode.bytes,
+                                 $salt, $saltlen, $hashlen,
+                                 $encoded, $encodedlen);
+        }
+        when Argon2_i {
+            argon2i_hash_encoded($t_cost, $m_cost, $parallelism,
+                                 $pwd, $pwd.encode.bytes,
+                                 $salt, $saltlen, $hashlen,
+                                 $encoded, $encodedlen);
+        }
+        when Argon2_id {
+            argon2id_hash_encoded($t_cost, $m_cost, $parallelism,
+                                  $pwd, $pwd.encode.bytes,
+                                  $salt, $saltlen, $hashlen,
+                                  $encoded, $encodedlen);
+        }
+        default {
+            "unknown type: $type";
+        }
+    };
 
     if $err { die("Hashing failed with error code: "~$err); }
 
     $encoded.decode;
 }
 
-sub argon2-verify($encoded, $pwd) is export {
-    # ARGON2_OK = 0
-    if argon2i_verify($encoded, $pwd, $pwd.encode.bytes) {
-        return False;
-    } else {
-        return True;
+sub argon2-find-type($encoded) {
+    return Argon2_id if $encoded.starts-with('$argon2id$');
+    return Argon2_i if $encoded.starts-with('$argon2i$');
+    return Argon2_d if $encoded.starts-with('$argon2d$');
+    Argon2Type;
+}
+
+sub argon2-verify($encoded, $pwd, Argon2Type :$type is copy) is export {
+    $type //= argon2-find-type($encoded);
+
+    my $result = do given $type {
+        when Argon2_d {
+            argon2d_verify($encoded, $pwd, $pwd.encode.bytes);
+        }
+        when Argon2_i {
+            argon2i_verify($encoded, $pwd, $pwd.encode.bytes);
+        }
+        when Argon2_id {
+            argon2id_verify($encoded, $pwd, $pwd.encode.bytes);
+        }
+        default {
+            -1;
+        }
     }
+
+    # ARGON2_OK = 0
+    return $result == 0;
 }
 
 =begin pod
 
 =head1 NAME
 
-Crypt::Argon2 - Easy Argon2i password hashing
+Crypt::Argon2 - Easy Argon2 password hashing
 
 =head1 SYNOPSIS
 
@@ -60,6 +107,11 @@ False
 
 > argon2-hash("password", :t_cost(4), :m_cost(2**18), :parallelism(4), :hashlen(24))
 $argon2i$v=19$m=262144,t=4,p=4$Ou7t7DzIXXJnEIok0kr10A$0VC9/L+aXKI34i1FQHla4LxQz30/3G0H
+
+# Other variants are supported:
+> argon2-hash("password", :type(Argon2_id))
+$argon2id$v=19$m=65536,t=2,p=2$Qj4oYwx2A1Hryw03ntMNRQ$mQc1Zn4oSIvH8gduU1xNtQ
+
 ```
 =end code
 
@@ -80,8 +132,11 @@ Buf:0x<02 78 d7 dc 29 4d 8b 9a fb 89 0d 91 be 09 64 d0>
 
 L<Argon2|https://github.com/P-H-C/phc-winner-argon2> is the winner of the
 Password Hashing Competition. It is both memory- and compute-hard. This module
-is a NativeCall binding using the Argon2i variant, which is resistant to
-side-channel attacks.
+is a NativeCall binding that defaults to the Argon2i variant, which is
+resistant to side-channel attacks.
+
+Additionally, C<Argon2_d> and C<Argon2_id> variants are supported with the
+"type" parameter to C<argon2-hash>.
 
 =head1 COST PARAMETERS
 

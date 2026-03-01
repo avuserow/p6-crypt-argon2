@@ -4,11 +4,23 @@ use NativeCall;
 
 unit module Crypt::Argon2::Base;
 
-
+our enum Argon2Type is export <Argon2_d Argon2_i Argon2_id>;
 
 constant ARGON2 = %?RESOURCES<libraries/argon2>;
 
 
+
+sub argon2d_hash_encoded(uint32 $t_cost,
+                         uint32 $m_cost,
+                         uint32 $parallelism,
+                         Str $pwd is encoded('utf8'), uint32 $pwdlen,
+                         Buf $salt, size_t $saltlen,
+                         size_t $hashlen, Buf $encoded,
+                         size_t $encodedlen)
+    is native(ARGON2)
+    returns int
+    is export
+    { * }
 
 sub argon2i_hash_encoded(uint32 $t_cost,
                          uint32 $m_cost,
@@ -22,10 +34,30 @@ sub argon2i_hash_encoded(uint32 $t_cost,
     is export
     { * }
 
+sub argon2id_hash_encoded(uint32 $t_cost,
+                          uint32 $m_cost,
+                          uint32 $parallelism,
+                          Str $pwd is encoded('utf8'), uint32 $pwdlen,
+                          Buf $salt, size_t $saltlen,
+                          size_t $hashlen, Buf $encoded,
+                          size_t $encodedlen)
+    is native(ARGON2)
+    returns int
+    is export
+    { * }
+
 sub argon2_encodedlen(uint32 $t_cost, uint32 $m_cost, uint32 $parallelism,
-                      uint32 $saltlen, uint32 $hashlen)
+                      uint32 $saltlen, uint32 $hashlen, uint32 $variant)
     is native(ARGON2)
     returns size_t
+    is export
+    { * }
+
+sub argon2d_verify(Str $encoded is encoded('utf8'),
+                   Str $pwd is encoded('utf8'),
+                   size_t $pwdlen)
+    is native(ARGON2)
+    returns int
     is export
     { * }
 
@@ -37,7 +69,26 @@ sub argon2i_verify(Str $encoded is encoded('utf8'),
     is export
     { * }
 
+sub argon2id_verify(Str $encoded is encoded('utf8'),
+                    Str $pwd is encoded('utf8'),
+                    size_t $pwdlen)
+    is native(ARGON2)
+    returns int
+    is export
+    { * }
 
+
+
+sub argon2d_hash_raw(uint32 $t_cost,
+                     uint32 $m_cost,
+                     uint32 $parallelism,
+                     Str $pwd is encoded('utf8'), uint32 $pwdlen,
+                     Buf $salt, size_t $saltlen,
+                     Buf $hash, size_t $hashlen)
+    is native(ARGON2)
+    returns int
+    is export
+    { * }
 
 sub argon2i_hash_raw(uint32 $t_cost,
                      uint32 $m_cost,
@@ -45,6 +96,17 @@ sub argon2i_hash_raw(uint32 $t_cost,
                      Str $pwd is encoded('utf8'), uint32 $pwdlen,
                      Buf $salt, size_t $saltlen,
                      Buf $hash, size_t $hashlen)
+    is native(ARGON2)
+    returns int
+    is export
+    { * }
+
+sub argon2id_hash_raw(uint32 $t_cost,
+                      uint32 $m_cost,
+                      uint32 $parallelism,
+                      Str $pwd is encoded('utf8'), uint32 $pwdlen,
+                      Buf $salt, size_t $saltlen,
+                      Buf $hash, size_t $hashlen)
     is native(ARGON2)
     returns int
     is export

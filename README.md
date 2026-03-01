@@ -3,7 +3,7 @@
 NAME
 ====
 
-Crypt::Argon2 - Easy Argon2i password hashing
+Crypt::Argon2 - Easy Argon2 password hashing
 
 SYNOPSIS
 ========
@@ -24,6 +24,11 @@ False
 
 > argon2-hash("password", :t_cost(4), :m_cost(2**18), :parallelism(4), :hashlen(24))
 $argon2i$v=19$m=262144,t=4,p=4$Ou7t7DzIXXJnEIok0kr10A$0VC9/L+aXKI34i1FQHla4LxQz30/3G0H
+
+# Other variants are supported:
+> argon2-hash("password", :type(Argon2_id))
+$argon2id$v=19$m=65536,t=2,p=2$Qj4oYwx2A1Hryw03ntMNRQ$mQc1Zn4oSIvH8gduU1xNtQ
+
 ```
 ```
 
@@ -42,7 +47,9 @@ Buf:0x<02 78 d7 dc 29 4d 8b 9a fb 89 0d 91 be 09 64 d0>
 DESCRIPTION
 ===========
 
-[Argon2](https://github.com/P-H-C/phc-winner-argon2) is the winner of the Password Hashing Competition. It is both memory- and compute-hard. This module is a NativeCall binding using the Argon2i variant, which is resistant to side-channel attacks.
+[Argon2](https://github.com/P-H-C/phc-winner-argon2) is the winner of the Password Hashing Competition. It is both memory- and compute-hard. This module is a NativeCall binding that defaults to the Argon2i variant, which is resistant to side-channel attacks.
+
+Additionally, `Argon2_d` and `Argon2_id` variants are supported with the "type" parameter to `argon2-hash`.
 
 COST PARAMETERS
 ===============

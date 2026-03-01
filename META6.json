@@ -10,7 +10,7 @@
   ],
   "depends": [
   ],
-  "description": "Easy Argon2i password hashing",
+  "description": "Easy Argon2 password hashing",
   "license": "Artistic-2.0",
   "name": "Crypt::Argon2",
   "perl": "6.*",
